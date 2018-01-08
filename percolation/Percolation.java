@@ -1,24 +1,25 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    private int gridSize; // instance variable
-    private int startNodeIdx; // first node idx
-    private int endNodeIdx; // end node idx
-    private int[] openSites; 
-    private WeightedQuickUnionUF connectedSites;
-    // private WeightedQuickUnionUF endConnectedSites;
-    private int CLOSED = 0;
-    private int OPEN = 1;
+    private static final boolean CLOSED = false;
+    private static final boolean OPEN = true;
+
+    private final int gridSize; // instance variable
+    private final int startNodeIdx; // first node idx
+    private final int endNodeIdx; // end node idx
+    private boolean[] openSites;
+    private int totalOpenSites = 0;
+    private final WeightedQuickUnionUF connectedSites;
     
     public Percolation(int n) {          // create n-by-y grid, with all sites blocked
         this.gridSize = n;
-        startNodeIdx = xyTo1D(n,n) + 1;
-        endNodeIdx = xyTo1D(n,n) + 2;
+        startNodeIdx = xyTo1D(n, n) + 1;
+        endNodeIdx = xyTo1D(n, n) + 2;
         if (n < 1) {
             throw new java.lang.IllegalArgumentException("grid size < 1");
         }
         // create openSites array and initialize to closed
-        this.openSites = new int[xyTo1D(n, n) + 1];
+        this.openSites = new boolean[xyTo1D(n, n) + 1];
         for (int row = 1; row <= n; row++) {
             for (int col = 1; col <= n; col++) {
                 int idx = xyTo1D(row, col);
@@ -31,10 +32,11 @@ public class Percolation {
     public void open(int row, int col) {  // open site (row, col), checking if open already
         checkXY(row, col);
         int idx = xyTo1D(row, col);
-        if (!isOpen(row, col)){
+        if (!isOpen(row, col)) {
             this.openSites[idx] = OPEN;
+            totalOpenSites++;
             // check upper cell, do connection
-            if ( row - 1 >= 1 && this.isOpen(row - 1, col)) {
+            if (row - 1 >= 1 && this.isOpen(row - 1, col)) {
                 this.connectedSites.union(idx, xyTo1D(row - 1, col));
             }
             // check left cell, do connection
@@ -66,7 +68,7 @@ public class Percolation {
     public boolean isFull(int row, int col) {
         checkXY(row, col);
         // don't neeed isOpen check
-        return this.connectedSites.connected( xyTo1D(row, col), startNodeIdx);
+        return this.connectedSites.connected(xyTo1D(row, col), startNodeIdx);
     }
     public boolean percolates() {
         return this.connectedSites.connected(startNodeIdx, endNodeIdx);
@@ -74,12 +76,14 @@ public class Percolation {
         
     public static void main(String[] args) { // test client (optional)
         Percolation perc = new Percolation(2);
-        System.out.println(perc.isOpen(2,1) + " " + perc.isFull(2,1));
-        perc.open(2,1);
-        System.out.println(perc.isOpen(2,1) + " " + perc.isFull(2,1));
+        System.out.println(perc.isOpen(2, 1) + " " + perc.isFull(2, 1));
+        perc.open(2, 1);
+        System.out.println(perc.isOpen(2, 1) + " " + perc.isFull(2, 1));
         System.out.println(perc.percolates());
     }
-    
+    public int numberOfOpenSites() {
+        return totalOpenSites;
+    } 
     private int xyTo1D(int row, int col) {
         return this.gridSize * row + col;
     }
