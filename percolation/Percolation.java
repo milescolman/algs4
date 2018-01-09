@@ -1,41 +1,43 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    private static final int CLOSED = 0x0000;
-    private static final int OPEN = 0x0001;
-    private static final int BOTTOM_CONNECTED = 0x0002;
+    private static final byte CLOSED = 0;
+    private static final byte OPEN = 1;
+    private static final byte BOTTOM_CONNECTED = 2;
+    private static final byte TOP_CONNECTED = 4;
     
-    private final int gridSize; // instance variable
-    private final int startNodeIdx; // first node idx
-    private int[] openSites;
+    private final int gridSize;
+    private byte[] openSites;
     private int totalOpenSites = 0;
     private final WeightedQuickUnionUF connectedSites;
     private boolean percolates = false;
     
     public Percolation(int n) {          // create n-by-y grid, with all sites blocked
-        this.gridSize = n;
-        startNodeIdx = xyTo1D(n, n) + 1;
+        gridSize = n;
         if (n < 1) {
             throw new java.lang.IllegalArgumentException("grid size < 1");
         }
         // create length n by n openSites array and initialize to closed
-        this.openSites = new int[xyTo1D(n, n) + 1];
-        for (int row = 1; row < n; row++) {
+        openSites = new byte[xyTo1D(n, n) + 1];
+        for (int row = 2; row < n; row++) {
             for (int col = 1; col <= n; col++) {
                 int idx = xyTo1D(row, col);
-                this.openSites[idx] = CLOSED;
+                openSites[idx] = CLOSED;
             }
         }
-        
+        // initialize top row to be top connected
         // initialize last row to be bottom connected
+        // they might be the same row!
         for (int col = 1; col <= n; col++) {
             int idx = xyTo1D(n, col);
             openSites[idx] = BOTTOM_CONNECTED;
+            idx = xyTo1D(1, col);
+            openSites[idx] |= TOP_CONNECTED; // use |= bc 1 x 1 grids are possible
         }
-        // initialize Weighted Quick Union UF with start virtual node 
-        this.connectedSites = new WeightedQuickUnionUF(startNodeIdx + 1);
+        // initialize Weighted Quick Union UF 
+        connectedSites = new WeightedQuickUnionUF(xyTo1D(n, n) + 1);
 
-//        System.out.println(java.util.Arrays.toString(openSites));
+     //   System.out.println(java.util.Arrays.toString(openSites));
     }
     public void open(int row, int col) {  // open site (row, col), checking if open already
         checkXY(row, col);
@@ -43,44 +45,50 @@ public class Percolation {
         if (!isOpen(row, col)) {
             totalOpenSites++;
             
-            int newStatus = openSites[idx] | OPEN; // might have bottom connected set already
+            int newStatus = openSites[idx] | OPEN; // might have top / bottom connected set already
             
-            // set up first row connection to the start node
-            if (row == 1) {
-                connectedSites.union(idx, startNodeIdx);
-            } 
-            
+            int upperRootIdx = Integer.MIN_VALUE;
+            int leftRootIdx = Integer.MIN_VALUE;
+            int lowerRootIdx = Integer.MIN_VALUE;
+            int rightRootIdx = Integer.MIN_VALUE;
             // check upper cell, do connection
-            if (row - 1 >= 1 && this.isOpen(row - 1, col)) {
-                int upperRootIdx = this.connectedSites.find(xyTo1D(row - 1, col));
+            if (row - 1 >= 1 && isOpen(row - 1, col)) {
+                upperRootIdx = connectedSites.find(xyTo1D(row - 1, col));
                 newStatus |= openSites[upperRootIdx];
-                this.connectedSites.union(idx, xyTo1D(row - 1, col));
+                connectedSites.union(idx, xyTo1D(row - 1, col));
             }
             // check left cell, do connection
-            if (col - 1 >= 1 && this.isOpen(row, col - 1)) {
-                int leftRootIdx = this.connectedSites.find(xyTo1D(row, col - 1));
+            if (col - 1 >= 1 && isOpen(row, col - 1)) {
+                leftRootIdx = connectedSites.find(xyTo1D(row, col - 1));
                 newStatus |= openSites[leftRootIdx];
-                this.connectedSites.union(idx, xyTo1D(row, col - 1));
+                connectedSites.union(idx, xyTo1D(row, col - 1));
             }
             // check lower cell, do connection
-            if (row + 1 <= this.gridSize && this.isOpen(row + 1, col)) {
-                int lowerRootIdx = this.connectedSites.find(xyTo1D(row + 1, col));
+            if (row + 1 <= gridSize && isOpen(row + 1, col)) {
+                lowerRootIdx = connectedSites.find(xyTo1D(row + 1, col));
                 newStatus |= openSites[lowerRootIdx];
-                this.connectedSites.union(idx, xyTo1D(row + 1, col));
+                connectedSites.union(idx, xyTo1D(row + 1, col));
             }
             // check right cell, do connection
-            if (col + 1 <= this.gridSize && this.isOpen(row, col + 1)) {
-                int rightRootIdx = this.connectedSites.find(xyTo1D(row, col + 1));
+            if (col + 1 <= gridSize && isOpen(row, col + 1)) {
+                rightRootIdx = connectedSites.find(xyTo1D(row, col + 1));
                 newStatus |= openSites[rightRootIdx];
-                this.connectedSites.union(idx, xyTo1D(row, col + 1));
+                connectedSites.union(idx, xyTo1D(row, col + 1));
             }
+            // either element is its own root or one of its neighbor has the same root
+            // updating all the neighboring root statuses skips another find for the element root 
             openSites[idx] |= newStatus;
-            int rootIdx = connectedSites.find(idx);
-            openSites[rootIdx] |= newStatus;
-
+            if (upperRootIdx != Integer.MIN_VALUE)
+                openSites[upperRootIdx] |= newStatus;
+            if (leftRootIdx != Integer.MIN_VALUE)
+                openSites[leftRootIdx] |= newStatus;
+            if (lowerRootIdx != Integer.MIN_VALUE)
+                openSites[lowerRootIdx] |= newStatus;
+            if (rightRootIdx != Integer.MIN_VALUE)
+                openSites[rightRootIdx] |= newStatus;
+            
             // check for percolation
-            int startRootIdx = connectedSites.find(startNodeIdx);
-            if ((startRootIdx == rootIdx) && ((newStatus & BOTTOM_CONNECTED) != 0)) {
+            if (((newStatus & TOP_CONNECTED) != 0) && ((newStatus & BOTTOM_CONNECTED) != 0)) {
                 percolates = true;
             }
 //            System.out.println(java.util.Arrays.toString(openSites));
@@ -89,15 +97,16 @@ public class Percolation {
     public boolean isOpen(int row, int col) {
         checkXY(row, col);
         int idx = xyTo1D(row, col);
-        return ((this.openSites[idx] & OPEN) != 0);
+        return ((openSites[idx] & OPEN) != 0);
     }
     public boolean isFull(int row, int col) {
         checkXY(row, col);
-        return this.connectedSites.connected(xyTo1D(row, col), startNodeIdx);
+        int root = connectedSites.find(xyTo1D(row, col));
+        return isOpen(row, col) && ((openSites[root] & TOP_CONNECTED) != 0);
     }
     public boolean percolates() {
         return percolates;
-    }  // does the system percolate?
+    } 
         
     public static void main(String[] args) { // test client (optional)
         Percolation perc = new Percolation(1);
