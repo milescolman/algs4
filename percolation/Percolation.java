@@ -51,40 +51,41 @@ public class Percolation {
             int leftRootIdx = Integer.MIN_VALUE;
             int lowerRootIdx = Integer.MIN_VALUE;
             int rightRootIdx = Integer.MIN_VALUE;
+            
             // check upper cell, do connection
             if (row - 1 >= 1 && isOpen(row - 1, col)) {
                 upperRootIdx = connectedSites.find(xyTo1D(row - 1, col));
                 newStatus |= openSites[upperRootIdx];
-                connectedSites.union(idx, xyTo1D(row - 1, col));
+                connectedSites.union(idx, upperRootIdx);
             }
             // check left cell, do connection
             if (col - 1 >= 1 && isOpen(row, col - 1)) {
                 leftRootIdx = connectedSites.find(xyTo1D(row, col - 1));
                 newStatus |= openSites[leftRootIdx];
-                connectedSites.union(idx, xyTo1D(row, col - 1));
+                connectedSites.union(idx, leftRootIdx);
             }
             // check lower cell, do connection
             if (row + 1 <= gridSize && isOpen(row + 1, col)) {
                 lowerRootIdx = connectedSites.find(xyTo1D(row + 1, col));
                 newStatus |= openSites[lowerRootIdx];
-                connectedSites.union(idx, xyTo1D(row + 1, col));
+                connectedSites.union(idx, lowerRootIdx);
             }
             // check right cell, do connection
             if (col + 1 <= gridSize && isOpen(row, col + 1)) {
                 rightRootIdx = connectedSites.find(xyTo1D(row, col + 1));
                 newStatus |= openSites[rightRootIdx];
-                connectedSites.union(idx, xyTo1D(row, col + 1));
+                connectedSites.union(idx, rightRootIdx);
             }
             // either element is its own root or one of its neighbor has the same root
             // updating all the neighboring root statuses skips another find for the element root 
             openSites[idx] |= newStatus;
             if (upperRootIdx != Integer.MIN_VALUE)
                 openSites[upperRootIdx] |= newStatus;
-            if (leftRootIdx != Integer.MIN_VALUE)
+            else if (leftRootIdx != Integer.MIN_VALUE)
                 openSites[leftRootIdx] |= newStatus;
-            if (lowerRootIdx != Integer.MIN_VALUE)
+            else if (lowerRootIdx != Integer.MIN_VALUE)
                 openSites[lowerRootIdx] |= newStatus;
-            if (rightRootIdx != Integer.MIN_VALUE)
+            else if (rightRootIdx != Integer.MIN_VALUE)
                 openSites[rightRootIdx] |= newStatus;
             
             // check for percolation
