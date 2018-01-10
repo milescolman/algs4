@@ -31,7 +31,8 @@ public class Deque<Item> implements Iterable<Item> {
         first.prev = null;
         
         if (oldFirst != null) oldFirst.prev = first;
-        if (size++ == 0) last = first;
+        if (size == 0) last = first;
+        size++;
     }
     public void addLast(Item item) {          // add the item to the end
         if (item == null) throw new IllegalArgumentException();
@@ -43,7 +44,8 @@ public class Deque<Item> implements Iterable<Item> {
         last.prev = oldLast;
         
         if (oldLast != null) oldLast.next = last;
-        if (size++ == 0) first = last;
+        if (size == 0) first = last;
+        size++;
     }
     public Item removeFirst() {                // remove and return the item from the front
         if (isEmpty()) throw new java.util.NoSuchElementException();
