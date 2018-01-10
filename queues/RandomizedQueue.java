@@ -54,12 +54,11 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     }
     // return an independent iterator over items in random order
     public Iterator<Item> iterator() { return new RandomizedQueueIterator(); }
-    private class RandomizedQueueIterator implements Iterator<Item>{
-        private int[] validRandomIdxs;
+    private class RandomizedQueueIterator implements Iterator<Item> {
+        private final int[] validRandomIdxs;
         private int idx = 0; 
         public RandomizedQueueIterator() {
             // initialize validRandomIdxs by copying in the valid array addresses
-            Item item = null;
             int k = 0;
             validRandomIdxs = new int[N - Ndequeued];
             for (int i = 0; i < N; i++) {
@@ -67,12 +66,12 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
                     validRandomIdxs[k++] = i;
                 }
             }
-            // in-place shuffle
-            for (int i = 0; i < validRandomIdxs.length; i++) {
+            // in-place Fisher-Yates shuffle
+            for (int i = validRandomIdxs.length - 1; i > 0; i--) {
+                int j = StdRandom.uniform(i + 1);
                 int tmp = validRandomIdxs[i];
-                int rand = StdRandom.uniform(validRandomIdxs.length);
-                validRandomIdxs[i] = validRandomIdxs[rand];
-                validRandomIdxs[rand] = tmp;
+                validRandomIdxs[i] = validRandomIdxs[j];
+                validRandomIdxs[j] = tmp;
             }
         }
         
