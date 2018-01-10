@@ -52,7 +52,7 @@ public class Deque<Item> implements Iterable<Item> {
         Item item = first.item;
         first.item = null;
         first = first.next;
-        first.prev = null;
+        if (!isEmpty()) first.prev = null;
         return item;
     }
     public Item removeLast() {                // remove and return the item from the end
@@ -62,7 +62,7 @@ public class Deque<Item> implements Iterable<Item> {
         Item item = last.item;
         last.item = null;
         last = last.prev;
-        last.next = null;
+        if (!isEmpty()) last.next = null;
         return item;
     }
     public Iterator<Item> iterator() { return new DequeIterator(); }        // return an iterator over items in order from front to end
@@ -70,8 +70,8 @@ public class Deque<Item> implements Iterable<Item> {
         private Node current = first;
         
         public boolean hasNext() { return current != null; }
-        public void remove () { throw new UnsupportedOperationException(); }
-        public Item next () {
+        public void remove() { throw new UnsupportedOperationException(); }
+        public Item next() {
             if (!hasNext()) throw new java.util.NoSuchElementException();
             Item item = current.item;
             current = current.next;
@@ -82,14 +82,13 @@ public class Deque<Item> implements Iterable<Item> {
     public static void main(String[] args) {  // unit testing (optional)
         Deque<String> deque = new Deque<>();
         System.out.println("size " + deque.size());
-        deque.addFirst("2");
         deque.addFirst("1");
-        deque.addLast("3");
-        
-        for (String s : deque)
-            System.out.print(s + " ");
-        System.out.println();
+        System.out.println(deque.removeFirst());
+        deque.addFirst("A");
         System.out.println(deque.removeLast());
+        deque.addLast("B");
+        System.out.println(deque.removeLast());
+        deque.addLast("C");
         System.out.println(deque.removeFirst());
         for (String s : deque)
             System.out.print(s + " ");
