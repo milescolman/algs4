@@ -12,7 +12,7 @@ public class Permutation {
                 String str = StdIn.readString();
                 if (rq.size() < k) // add k items
                     rq.enqueue(str);
-                else if (rq.size() == k){ // swap out an item with decreasing probability
+                else if (rq.size() == k) { // swap out an item with decreasing probability
                     int swap = StdRandom.uniform(m + 1);
                     if (swap == 0) {
                         // remove one item and add one back in

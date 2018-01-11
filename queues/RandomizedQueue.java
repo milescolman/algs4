@@ -4,10 +4,12 @@ import edu.princeton.cs.algs4.StdRandom;
 public class RandomizedQueue<Item> implements Iterable<Item> {
     private int n;
     private int nDequeued;
-    private Item[] s; 
+    private Item[] s;
+    private int[] randomIdxsToDequeue;
     public RandomizedQueue() {                 // construct an empty randomized queue
         n = 0; // n - 1 points to last enqueue item
         s = (Item[]) new Object[1]; // start  with size-1 storage
+        randomIdxsToDequeue = new int[1];
         nDequeued = 0;
     }
     public boolean isEmpty() {                // is the randomized queue empty?
@@ -19,72 +21,87 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     public void enqueue(Item item) {          // add the item
         if (item == null) throw new java.lang.IllegalArgumentException();
         if (n == s.length) resize(2 * n);  // resize bigger when s is full
-        s[n++] = item;
+        // if (n == nDequeued) s[0] = item; // all items have been removed, use left slot
+        s[n] = item;
+        // n - nDequeued + 1 b/c want to include idx we have not added yet 
+        int choice = StdRandom.uniform(n - nDequeued + 1);
+        // p = 1/(nValidIdxs + 1) event: new address = n  
+        if (choice == (n - nDequeued)) randomIdxsToDequeue[n - nDequeued] = n; 
+        else { // put chosen idx at end, put new idx in old spot to avoid duplication
+            randomIdxsToDequeue[n - nDequeued] = randomIdxsToDequeue[choice];
+            randomIdxsToDequeue[choice] = n;
+        }
+        n++;
     }
     private void resize(int capacity) {
         Item[] copy = (Item[]) new Object[capacity];
+        int[] randomIdxsToDequeueCopy = new int[capacity];
         int k = 0;
         for (int i = 0; i < n; i++) {
-            if (s[i] != null)
+            if (s[i] != null) {
+                randomIdxsToDequeueCopy[k] = k;
                 copy[k++] = s[i];
+            }
         }
         s = copy;
         n = k;
         nDequeued = 0;
+        randomIdxsToDequeue = randomIdxsToDequeueCopy;
     }
 
     public Item dequeue() {                   // remove and return a random item
-        if (n == 0) throw new java.util.NoSuchElementException();
-        if (nDequeued > (3 * n / 4)) resize(n/2); // resize down when 3/4 of s is junk
-        int randIdx = StdRandom.uniform(n);
-        while (s[randIdx] == null)
-            randIdx = StdRandom.uniform(n);
+        if (size() == 0) throw new java.util.NoSuchElementException();
+        if (size() == (s.length / 4)) resize(2 * size()); // resize down when 3/4 of s is empty
+        int randIdx = randomIdxsToDequeue[n - nDequeued - 1];
+        randomIdxsToDequeue[n - nDequeued - 1] = 0; // overwrite just-released idx
+
         Item item = s[randIdx];
         s[randIdx] = null; // release memory
-        
         nDequeued++;
         return item;
     }
     public Item sample() {                    // return a random item (but do not remove it)
-        if (n == 0) throw new java.util.NoSuchElementException();
-        int sampleIdx = StdRandom.uniform(n);
-        while (s[sampleIdx] == null)
-            sampleIdx = StdRandom.uniform(n);
+        if (size() == 0) throw new java.util.NoSuchElementException();
+        int sampleIdx = StdRandom.uniform(n - nDequeued);
+        sampleIdx = randomIdxsToDequeue[sampleIdx];
         return s[sampleIdx];
     }
-    // return an independent iterator over items in random order
+    // return an independent iterator over items in independent random order
     public Iterator<Item> iterator() { return new RandomizedQueueIterator(); }
     private class RandomizedQueueIterator implements Iterator<Item> {
-        private final int[] validRandomIdxs;
-        private int idx = 0; 
-        public RandomizedQueueIterator() {
-            // initialize validRandomIdxs by copying in the valid array addresses
-            int k = 0;
-            validRandomIdxs = new int[n - nDequeued];
-            for (int i = 0; i < n; i++) {
-                if (s[i] != null) {
-                    validRandomIdxs[k++] = i;
-                }
-            }
-            // in-place Fisher-Yates shuffle
-            for (int i = validRandomIdxs.length - 1; i > 0; i--) {
-                int j = StdRandom.uniform(i + 1);
-                int tmp = validRandomIdxs[i];
-                validRandomIdxs[i] = validRandomIdxs[j];
-                validRandomIdxs[j] = tmp;
-            }
-        }
+        private int idx = 0;
+        private final int [] shuffledIdxsToDequeue;
         
+        private RandomizedQueueIterator() {
+            shuffledIdxsToDequeue = new int[size()];
+            for (int i = 0; i < size(); i++)
+                shuffledIdxsToDequeue[i] = randomIdxsToDequeue[i];
+            StdRandom.shuffle(shuffledIdxsToDequeue);
+        }
         public boolean hasNext() { 
-            return idx < validRandomIdxs.length;
+            return idx < size();
         }
         public void remove() { throw new java.lang.UnsupportedOperationException(); }
         public Item next() {
-            if (idx >= validRandomIdxs.length) throw new java.util.NoSuchElementException();
-            return s[validRandomIdxs[idx++]];
+            if (idx >= size()) throw new java.util.NoSuchElementException();
+            return s[shuffledIdxsToDequeue[idx++]];
         }
     }
-    public static void main(String[] args) {  // unit testing (optional)
+    private static void basicTests() {
+        RandomizedQueue<Integer> rq = new RandomizedQueue<>();
+        rq.enqueue(222);
+        System.out.println(rq.dequeue());
+        rq.enqueue(219);
+        System.out.println(rq.dequeue());
+        rq.enqueue(285);
+        System.out.println(rq.dequeue());
+        RandomizedQueue<Integer> rqq = new RandomizedQueue<Integer>();
+        rqq.enqueue(6);
+        System.out.println(rqq.dequeue());
+        rqq.enqueue(38);
+        System.out.println(rqq.dequeue());
+        rqq.enqueue(14);
+        System.out.println(rqq.dequeue());
         RandomizedQueue<String> rqi = new RandomizedQueue<>();
         System.out.println("empty? " + rqi.isEmpty());
         
@@ -115,8 +132,46 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         System.out.println();
         System.out.println("size " + rqi.size());
         
-        while(!rqi.isEmpty())
+        while (!rqi.isEmpty())
             System.out.print(rqi.dequeue());
         System.out.println();
+    }
+    private static void freqTests() {
+        RandomizedQueue<String> rq = new RandomizedQueue<>();
+        int [] results = new int[6];
+        String result;
+        for (int i = 0; i < 12000; i++) {
+            rq.enqueue("A");
+            rq.enqueue("B");
+            rq.enqueue("C");
+            
+            result = "";
+            for (int j = 0; j < 3; j++)
+                result += rq.dequeue();
+            
+            switch (result) {
+                case "ABC": results[0]++;
+                break;
+                case "ACB": results[1]++;
+                break;
+                case "BAC": results[2]++;
+                break;
+                case "BCA": results[3]++;
+                break;
+                case "CAB": results[4]++;
+                break;
+                case "CBA": results[5]++;
+                break;
+                default: System.out.println("unhandled result: " + result);
+            }
+        }
+        System.out.println("ABC ACB BAC BCA CAB CBA");
+        for (int i = 0; i < results.length; i++)
+            System.out.print(results[i] + " ");
+        System.out.println();
+        
+    }
+    public static void main(String[] args) {  // unit testing (optional)
+        freqTests();
     }
 }
