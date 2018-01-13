@@ -23,12 +23,12 @@ public class FastCollinearPoints {
          }
         
         for (int i = 0; i < auxPoints.length; i++) {
-            java.util.Arrays.sort(auxPoints, i, auxPoints.length); // sort by y, xcoordinate : include ith pt
-            Point p1 = auxPoints[i];
+            //java.util.Arrays.sort(auxPoints, 0, auxPoints.length); // sort by y, xcoordinate : include ith pt
+            Point p1 = points[i]; //OK to use points instead of auxPoints ?
             Comparator<Point> slopeOrder = p1.slopeOrder(); 
-            java.util.Arrays.sort(auxPoints, i + 1, auxPoints.length, slopeOrder); // sort by slope top1: pts after i
-            for (int j = i + 1; j < auxPoints.length -  2; j++) {
-                if (p1.slopeTo(auxPoints[j]) == Double.NEGATIVE_INFINITY) continue; //  repeated pt, shouldn't happen
+            java.util.Arrays.sort(auxPoints, 0, auxPoints.length, slopeOrder); // sort by slope with p1
+            for (int j = 0; j < auxPoints.length -  2; j++) {
+                if (p1.slopeTo(auxPoints[j]) == Double.NEGATIVE_INFINITY) continue; //  pt1, should be at front
                 int k = 1;
                 for (; j + k < auxPoints.length &&
                      slopeOrder.compare(auxPoints[j], auxPoints[j + k]) == 0; k++) continue;
@@ -37,11 +37,13 @@ public class FastCollinearPoints {
                 
                 if (numberOfSegments == segments.length)
                     resize(2 * segments.length);
-                // auxPoints[i] has lowest y value, auxPoints[j + k] has highest y value
-                LineSegment segment = new LineSegment(auxPoints[i], auxPoints[j + k]);
-                // check found segment versus saved segments?
-                segments[numberOfSegments++] = segment;
-                
+                // p1 may have lowest y value, auxPoints[j + k] has highest y value
+                java.util.Arrays.sort(auxPoints, j, j + k + 1);
+                // add only if origin is lowest point
+                if (p1.compareTo(auxPoints[j]) < 0) {
+                    LineSegment segment = new LineSegment(p1, auxPoints[j + k]);
+                    segments[numberOfSegments++] = segment;
+                }
                 // increment j by k
                 j += k;
             }
@@ -82,12 +84,14 @@ public class FastCollinearPoints {
         StdDraw.enableDoubleBuffering();
         StdDraw.setXscale(0, 32768);
         StdDraw.setYscale(0, 32768);
+        StdDraw.setPenRadius(0.005);
         for (Point p : points) {
             p.draw();
         }
         StdDraw.show();
         
         // print and draw the line segments
+        StdDraw.setPenRadius(0.001);
         FastCollinearPoints collinear = new FastCollinearPoints(points);
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
