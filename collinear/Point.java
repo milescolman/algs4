@@ -95,10 +95,10 @@ public class Point implements Comparable<Point> {
      * @return the Comparator that defines this ordering on points
      */
     public Comparator<Point> slopeOrder() {
-        return new slopeComparator();
+        return new SlopeComparator();
     }
     
-    private class slopeComparator implements Comparator<Point>{
+    private class SlopeComparator implements Comparator<Point> {
         public int compare(Point p1, Point p2) {
             // calculate slopes from this pt to p1 and this pt to p2 
             double s1 = slopeTo(p1);

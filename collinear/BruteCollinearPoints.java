@@ -24,7 +24,7 @@ public class BruteCollinearPoints {
             segments = new LineSegment[0];
             numberOfSegments = 0;
         }
-        else {// count line segments containing 4 collinear pts
+        else { // count line segments containing 4 collinear pts
             int m = 0;
             for (int i = 0; i < points.length; i++) {
                 Point p = points[i];

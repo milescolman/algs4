@@ -6,14 +6,6 @@ import java.util.Comparator;
 public class FastCollinearPoints {
     private int numberOfSegments = 0;
     private LineSegment[] segments = new LineSegment[1];
-        
-    private void resize(int capacity) {
-        LineSegment[] aux = new LineSegment[capacity];
-        for (int i = 0; i < numberOfSegments; i++)
-            aux[i] = segments[i];
-        segments = aux;
-    }
-    
     public FastCollinearPoints(Point[] points) {   // finds all line segments containing 4 or more points
         if (points == null) throw new java.lang.IllegalArgumentException("null argument to constructor");
         for (Point p : points) {
@@ -56,7 +48,14 @@ public class FastCollinearPoints {
         }
         resize(numberOfSegments);
     }
-
+        
+    private void resize(int capacity) {
+        LineSegment[] aux = new LineSegment[capacity];
+        for (int i = 0; i < numberOfSegments; i++)
+            aux[i] = segments[i];
+        segments = aux;
+    }
+    
     public int numberOfSegments() {        // the number of line segments
         return numberOfSegments;
     }
