@@ -28,7 +28,7 @@ public class FastCollinearPoints {
             Comparator<Point> slopeOrder = p1.slopeOrder(); 
             java.util.Arrays.sort(auxPoints, i + 1, auxPoints.length, slopeOrder); // sort by slope top1: pts after i
             for (int j = i + 1; j < auxPoints.length -  2; j++) {
-                if (p1.slopeTo(auxPoints[j]) == Double.NEGATIVE_INFINITY) continue; //repeated pt, shouldn't happen
+                if (p1.slopeTo(auxPoints[j]) == Double.NEGATIVE_INFINITY) continue; //  repeated pt, shouldn't happen
                 int k = 1;
                 for (; j + k < auxPoints.length &&
                      slopeOrder.compare(auxPoints[j], auxPoints[j + k]) == 0; k++) continue;
@@ -60,7 +60,10 @@ public class FastCollinearPoints {
         return numberOfSegments;
     }
     public LineSegment[] segments() {              // the line segments
-        return segments;
+        LineSegment[] aux = new LineSegment[segments.length];
+        for (int i = 0; i < segments.length; i++)
+            aux[i] = segments[i];
+        return aux;
     }
     
     public static void main(String[] args) {

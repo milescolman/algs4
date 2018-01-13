@@ -63,8 +63,8 @@ public class Point implements Comparable<Point> {
         int deltaX = that.x - this.x;
         int deltaY = that.y - this.y;
         if (deltaX == 0 && deltaY == 0) return Double.NEGATIVE_INFINITY;
-        if (deltaX == 0) return +0.0;
-        if (deltaY == 0) return Double.POSITIVE_INFINITY;
+        if (deltaX == 0) return Double.POSITIVE_INFINITY;
+        if (deltaY == 0) return +0.0;
         return (double) deltaY / deltaX;
     }
 
@@ -161,8 +161,8 @@ public class Point implements Comparable<Point> {
     public static void main(String[] args) {
         //    testDraw();
         Point pt1 = new Point(1, 1);
-        Point ptVert = new Point(2, 1);
-        Point ptHoriz = new Point(1, 2);
+        Point ptHoriz = new Point(2, 1);
+        Point ptVert = new Point(1, 2);
         Point pt2 = new Point(2, 2);
         
         System.out.println("y-x compare: should be -1 " + pt1.compareTo(pt2));
@@ -177,8 +177,8 @@ public class Point implements Comparable<Point> {
         System.out.println("slope: should be 0: " + pt1.slopeTo(ptHoriz));
     
         Comparator<Point> sO = pt1.slopeOrder();
-        System.out.println("slope compare() should be 1: " + sO.compare(pt2, ptVert));
-        System.out.println("slope compare() should be -1: " + sO.compare(pt2, ptHoriz));
+        System.out.println("slope compare() should be -1: " + sO.compare(pt2, ptVert));
+        System.out.println("slope compare() should be 1: " + sO.compare(pt2, ptHoriz));
         System.out.println("slope compare() should be 0: " + sO.compare(pt1, pt1));
     }
 }

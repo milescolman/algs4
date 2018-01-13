@@ -83,7 +83,10 @@ public class BruteCollinearPoints {
         return numberOfSegments;
     }
     public LineSegment[] segments() {               // the line segments
-        return segments;
+        LineSegment[] aux = new LineSegment[segments.length];
+        for (int i = 0; i < segments.length; i++)
+            aux[i] = segments[i];
+        return aux;
     }
     public static void main(String[] args) {
         
