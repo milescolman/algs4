@@ -63,8 +63,8 @@ public class Point implements Comparable<Point> {
         int deltaX = that.x - this.x;
         int deltaY = that.y - this.y;
         if (deltaX == 0 && deltaY == 0) return Double.NEGATIVE_INFINITY;
-        else if (deltaX == 0) return +0.0;
-        else if (deltaY == 0) return Double.POSITIVE_INFINITY;
+        if (deltaX == 0) return +0.0;
+        if (deltaY == 0) return Double.POSITIVE_INFINITY;
         return (double) deltaY / deltaX;
     }
 
@@ -81,11 +81,11 @@ public class Point implements Comparable<Point> {
      *         argument point
      */
     public int compareTo(Point that) {
-        if (that.y < this.y) return 1;
-        else if (that.y > this.y) return -1;
-        else if (that.x < this.x) return 1;
-        else if (that.x > this.x) return -1;
-        else return 0; // points are equal
+        if (this.y < that.y) return -1;
+        if (this.y > that.y) return +1;
+        if (this.x < that.x) return -1;
+        if (this.x > that.x) return +1;
+        return 0; // points are equal
     }
 
     /**
@@ -103,9 +103,9 @@ public class Point implements Comparable<Point> {
             // calculate slopes from this pt to p1 and this pt to p2 
             double s1 = slopeTo(p1);
             double s2 = slopeTo(p2);
-            if (s1 == s2) return 0;
-            else if (s2 < s1) return -1;
-            else return 1;
+            if (s1 < s2) return -1;
+            if (s1 > s2) return +1;
+            return 0;
         }
     }
 
