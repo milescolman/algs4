@@ -4,8 +4,8 @@ import edu.princeton.cs.algs4.StdRandom;
 import java.util.Stack;
 public class Board {
     private int[][] blocks = null;
-    private int manhattanDist = 0;
-    private int hammingDist = 0;
+    private final int manhattanDist;
+    private final int hammingDist;
     public Board(int[][] blocks) {          // construct a board from an n-by-n array of blocks
                                            // (where blocks[i][j] = block in row i, column j)
         if (blocks == null) throw new java.lang.IllegalArgumentException();
@@ -71,10 +71,6 @@ public class Board {
     }
     public Board twin() {                   // a board that is obtained by exchanging any pair of blocks
         int n = dimension();
-        int[][] arr = new int[n][n];
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                arr[i][j] = blocks[i][j];
         // swap random location
         int i = StdRandom.uniform(n);
         int j = StdRandom.uniform(n);
@@ -82,11 +78,14 @@ public class Board {
         int m = StdRandom.uniform(n);
         while (i == k && j == m) // change m if i,j = j,m
             m = StdRandom.uniform(n);
-        int tmp = arr[k][m];
-        arr[k][m] = arr[i][j];
-        arr[i][j] = tmp;
-        
-        return new Board(arr);
+        int tmp = blocks[k][m];
+        blocks[k][m] = blocks[i][j];
+        blocks[i][j] = tmp;
+        Board newBoard = new Board(blocks);
+        // unswap!
+        blocks[i][j] = blocks[k][m];
+        blocks[k][m] = tmp;
+        return newBoard;
     }
     public boolean equals(Object y) {       // does this board equal y?
         if (!(y instanceof Board)) return false;
@@ -161,13 +160,15 @@ public class Board {
                 new int[] {7,8,5},
         };
         Board b2 = new Board(arr2);
+        System.out.print("b2 pre-twin: " + b2.toString());
         Board b3 = b2.twin();
         Board b4 = new Board(arr2);
+        System.out.print("b2 post-twin: " + b2.toString());
+        System.out.print("twin: " + b3.toString());
         System.out.println("b2 equals b3? " + b2.equals(b3));
         System.out.println("b2 equals b4? " + b2.equals(b4));
-        System.out.print(b2.toString());
-        System.out.print(b4.toString());
-        System.out.println("***** Neighbors test. starting position: *****");
+        System.out.print("b4: " + b4.toString());
+        System.out.println("***** Neighbors test. starting position in b4 above *****");
         Iterable<Board> neighbors = b4.neighbors();
         for (Board bb : neighbors)
             System.out.println(bb.toString());
