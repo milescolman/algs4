@@ -69,7 +69,7 @@ public class Board {
         }
         return true;
     }
-    public Board twin() {                   // a board that is obtained by exchanging any pair of blocks
+    public Board twin() {  // a board that is obtained by exchanging any pair of blocks
         int n = dimension();
         // swap random location
         int i = StdRandom.uniform(n);
