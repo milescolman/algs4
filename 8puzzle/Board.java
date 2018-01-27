@@ -47,10 +47,9 @@ public class Board {
                 if (val != (i * n + j + 1) ) {
                     if (val == 0) 
                         continue;
-                    int Vdistance = Math.abs(((val - 1) % n) - j);
-                    int Hdistance = Math.abs((val - 1) / n - i);
-                    //System.out.println(val + " " + (Vdistance + Hdistance));
-                    manhattan += Vdistance + Hdistance;                   
+                    int vDistance = Math.abs(((val - 1) % n) - j);
+                    int hDistance = Math.abs((val - 1) / n - i);
+                    manhattan += vDistance + hDistance;                   
                 }
             }
         }
@@ -94,7 +93,8 @@ public class Board {
         return newBoard;
     }
     public boolean equals(Object y) {       // does this board equal y?
-        if (!(y instanceof Board)) return false;
+        if (y == null) return false;
+        if (y.getClass() != this.getClass()) return false;
         int n = dimension();
         int nY = ((Board) y).blocks.length;
         if (n != nY) return false;
@@ -141,8 +141,8 @@ public class Board {
         
     public String toString() {              // string representation of this board (in the output format specified below)
         int n = dimension();
-        String str = n + "\n";
         StringBuilder builder = new StringBuilder();
+        builder.append(n + "\n");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++)
                 builder.append(" " + blocks[i][j] + " ");
