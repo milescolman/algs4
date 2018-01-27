@@ -142,13 +142,14 @@ public class Board {
     public String toString() {              // string representation of this board (in the output format specified below)
         int n = dimension();
         String str = n + "\n";
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++)
-                str += " " + blocks[i][j] + " ";
-            str+= "\n";
+                builder.append(" " + blocks[i][j] + " ");
+            builder.append("\n");
         }
-        str += "\n";
-        return str;
+        builder.append("\n");
+        return builder.toString();
     }
     public static void main(String[] args) { // unit tests (not graded)
         int[][] arr = new int[][] {
