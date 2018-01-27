@@ -1,6 +1,3 @@
-import java.util.Iterator;
-import java.lang.Math;
-import edu.princeton.cs.algs4.StdRandom;
 import java.util.Stack;
 public class Board {
     private int[][] blocks = null;
@@ -69,16 +66,25 @@ public class Board {
         }
         return true;
     }
-    public Board twin() {  // a board that is obtained by exchanging any pair of blocks
-        int n = dimension();
-        // swap random location
-        int i = StdRandom.uniform(n);
-        int j = StdRandom.uniform(n);
-        int k = StdRandom.uniform(n);
-        int m = StdRandom.uniform(n);
-        while (i == k && j == m) // change m if i,j = j,m
-            m = StdRandom.uniform(n);
+    public Board twin() {  // a board that is obtained by exchanging any pair of adjacent blocks
+        // swap upper left with second from upper left location
+        int i = 0;
+        int j = 0;
+        int k = 1; // 2?
+        int m = 0;
+        
+        // check for empty block and re-choose if we selected it
+        int a = blocks[i][j];
+        if (a == 0) {
+            i = 1;
+            j = 1;
+        }
         int tmp = blocks[k][m];
+        if (tmp == 0) {
+            k = 0;
+            m = 1;
+            tmp = blocks[k][m];
+        }
         blocks[k][m] = blocks[i][j];
         blocks[i][j] = tmp;
         Board newBoard = new Board(blocks);
